@@ -31,7 +31,7 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
     try {
         await Product.findByIdAndDelete(req.params.id);
-        res.status(401).json("Product Deleted");
+        res.status(200).json("Product Deleted");
     } catch (err) {
         res.status(401).json(err);
     }
@@ -41,24 +41,38 @@ router.delete("/:id", async (req, res) => {
 
 router.get("/find/:id", async (req, res) => {
     try {
-        const user = await User.findById(req.params.id);
-        const { password, ...others } = user._doc;
-        res.status(200).json(others);
+        const product = await Product.findById(req.params.id);
+        res.status(200).json(product);
     } catch (err) {
         res.status(500).json(err);
     }
 });
 
-// //get Every  user
+//get all Products
 
-// router.get("/findAll/", async (req, res) => {
-//     try {
-//         const users = await User.find();
-//         res.status(200).json(users);
-//     } catch (err) {
-//         res.status(500).json(err);
-//     }
-// });
+router.get("/", async (req, res) => {
+    const qNew = req.query.new;
+    const qCategory = req.query.category;
+    try {
+      let products;
+  
+      if (qNew) {
+        products = await Product.find().sort({ createdAt: -1 }).limit(1);
+      } else if (qCategory) {
+        products = await Product.find({
+          categories: {
+            $in: [qCategory],
+          },
+        });
+      } else {
+        products = await Product.find();
+      }
+  
+      res.status(200).json(products);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  });
 
 
 module.exports = router;
